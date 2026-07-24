@@ -3,6 +3,10 @@
 # Add module to include path
 target_include_directories(xr PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
+if(LIBXR_DRIVER STREQUAL "mspm0")
+  target_include_directories(xr PUBLIC ${CMAKE_CURRENT_LIST_DIR}/TimedWaveform)
+endif()
+
 # Auto-include source files
 file(GLOB MODULE_WS2812_SRC CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_LIST_DIR}/*.cpp"
