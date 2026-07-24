@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <cstdint>
 
 #include "TimedWaveform.hpp"
@@ -23,7 +22,6 @@ class MSPM0TimedWaveform : public TimedWaveform
     DL_TIMER_EVENT_ROUTE event_route;
     std::uint32_t event_mask;
     std::uint8_t event_channel_id;
-    IRQn_Type dma_irqn;
   };
 
   explicit MSPM0TimedWaveform(Resources resources);
@@ -32,14 +30,8 @@ class MSPM0TimedWaveform : public TimedWaveform
   bool Busy() const override;
   void Stop() override;
 
-  static bool OnDmaInterrupt(DMA_Regs* dma);
-
  private:
-  static constexpr std::size_t kMaxDmaChannels = 16U;
-
-  static std::int8_t ChannelFromIidx(DL_DMA_EVENT_IIDX iidx);
-  static std::uint32_t ChannelInterruptMask(std::uint8_t channel);
-  static void RegisterInstance(MSPM0TimedWaveform& instance);
+  static void OnDmaComplete(void* context);
 
   void CompleteFromInterrupt();
   void ConfigureTrigger();
@@ -49,8 +41,6 @@ class MSPM0TimedWaveform : public TimedWaveform
   Resources resources_;
   std::uint32_t idle_compare_ = 0U;
   bool initialized_ = false;
-
-  static std::array<MSPM0TimedWaveform*, kMaxDmaChannels> instances_;
 };
 
 #define MSPM0_TIMED_WAVEFORM_INIT(timer_name, gpio_name, dma_channel_name)       \
@@ -60,7 +50,7 @@ class MSPM0TimedWaveform : public TimedWaveform
         &((timer_name##_INST)->COUNTERREGS.CC_01[gpio_name##_IDX]),             \
         static_cast<std::uint8_t>(dma_channel_name##_CHAN_ID),                  \
         DL_TIMER_PUBLISHER_INDEX_0, DL_DMA_SUBSCRIBER_INDEX_0,                  \
-        DL_TIMER_EVENT_ROUTE_1, DL_TIMER_EVENT_ZERO_EVENT, 1U, DMA_INT_IRQn     \
+        DL_TIMER_EVENT_ROUTE_1, DL_TIMER_EVENT_ZERO_EVENT, 1U                   \
   }
 
 }  // namespace LibXR

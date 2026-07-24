@@ -29,7 +29,6 @@ class TimedWaveform
   virtual ErrorCode Send(const CompareStream& stream, std::uint32_t timeout_ms) = 0;
   virtual bool Busy() const = 0;
   virtual void Stop() = 0;
-  virtual ~TimedWaveform() = default;
 };
 
 }  // namespace LibXR
